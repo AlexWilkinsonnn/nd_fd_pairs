@@ -35,7 +35,7 @@ def main(FD_DIR, ND_DIR, OUT_DIR): # Verify all is looking good then do matching
     with open(entry_fd.path, 'r') as f:
       f_reader = csv.reader(f)
       for line in f_reader:
-        arrB[0, int(line[0]) + 16, int(line[1]) + 58] = float(line[2])
+        arrB[0, int(line[0]) + 16, int(line[1]) + 112] = float(line[2])
 
     arr_aligned = np.concatenate([arrA, arrB], 2)
     np.save(os.path.join(OUT_DIR, "{}ndfd.npy".format(id_fd)), arr_aligned)
