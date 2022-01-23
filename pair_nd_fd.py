@@ -1,4 +1,4 @@
-import os, argparse, csv, re
+import os, argparse, csv, re, sys
 
 import numpy as np
 
@@ -12,7 +12,8 @@ def main(FD_DIR, ND_DIR, OUT_DIR): # Verify all is looking good then do matching
   if not os.path.exists(OUT_DIR):
     os.makedirs(OUT_DIR)
 
-  for i, (entry_fd, entry_nd) in enumerate(zip(os.scandir(FD_DIR), os.scandir(ND_DIR))):
+  sorted_scandir = lambda dir : sorted(os.scandir(dir), key=lambda entry: entry.name)
+  for i, (entry_fd, entry_nd) in enumerate(zip(sorted_scandir(FD_DIR), sorted_scandir(ND_DIR))):
     print("[{}/{}]".format(i + 1, N_fd), end='\r')
 
     if not re.match("^FD_detsim_[0-9]+.csv$", entry_fd.name):

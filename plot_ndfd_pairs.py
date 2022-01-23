@@ -29,6 +29,7 @@ def main(INPUT_DIR, N):
     # for i_ch, col in enumerate(arr_nd):
     #   for i_tick, adc in enumerate(col):
     #     if adc != 0:
+    #       # arr_nd_newres[i_ch, int(2*i_tick) - 4:int(2*i_tick)] += adc
     #       arr_nd_newres[i_ch, int(2*i_tick)] = adc
     # # for i_tick, row in enumerate(arr_nd_newres.T):
     # #   if arr_nd_newres[:, i_tick].sum() != 0: 
@@ -60,8 +61,6 @@ def main(INPUT_DIR, N):
 
     fig, ax = plt.subplots(tight_layout=True)
 
-    print(ticks_fd.shape)
-    print(ticks.shape)
     ax.hist(ticks, bins=len(ticks), weights=ticks_nd, histtype='step', linewidth=0.7, color='b', label='ND')
     ax.hist(ticks, bins=len(ticks), weights=ticks_fd, histtype='step', linewidth=0.7, color='r', label='FD')
     ax.set_ylabel("ADC", fontsize=14)
