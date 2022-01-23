@@ -1,7 +1,10 @@
-import os, argparse, csv
+import os, argparse, sys
 
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.lines import Line2D
+
+plt.rc('font', family='serif')
 
 def main(INPUT_DIR, N):
   for i, entry in enumerate(os.scandir(INPUT_DIR)):
@@ -16,8 +19,23 @@ def main(INPUT_DIR, N):
     arr_nd = arr_ndfd[0, :, :4608]
     arr_fd = arr_ndfd[0, :, 4608:]
 
-    arr_nd = arr_nd[16:-16, 112:-112]
-    arr_fd = arr_fd[16:-16, 112:-112]
+    arr_nd = arr_nd[16:-16, 58:-58]
+    arr_fd = arr_fd[16:-16, 58:-58]
+
+    # Manipulate array
+    # arr_fd = np.flip(arr_fd, 1)
+    # # arr_fd = np.roll(arr_fd, 103, 1)
+    # arr_nd_newres = np.zeros((480, 8984))
+    # for i_ch, col in enumerate(arr_nd):
+    #   for i_tick, adc in enumerate(col):
+    #     if adc != 0:
+    #       arr_nd_newres[i_ch, int(2*i_tick)] = adc
+    # # for i_tick, row in enumerate(arr_nd_newres.T):
+    # #   if arr_nd_newres[:, i_tick].sum() != 0: 
+    # #     print('\n')
+    # #     print(i_tick)
+    # #     break
+    # arr_nd = arr_nd_newres[:, 3251:3251 + 4492]
 
     fig, ax = plt.subplots(1, 2)
 
@@ -28,6 +46,33 @@ def main(INPUT_DIR, N):
     ax[1].set_title("FD")
 
     fig.tight_layout()
+    plt.show()
+
+    ch = (0, 0)
+    for i, col in enumerate(arr_nd):
+      if np.abs(col).sum() > ch[1]:
+        ch = (i, np.abs(col).sum())
+    ch = ch[0]
+
+    ticks_nd = arr_nd[ch, :]
+    ticks_fd = arr_fd[ch, :]
+    ticks = np.arange(1, arr_nd.shape[1] + 1)
+
+    fig, ax = plt.subplots(tight_layout=True)
+
+    print(ticks_fd.shape)
+    print(ticks.shape)
+    ax.hist(ticks, bins=len(ticks), weights=ticks_nd, histtype='step', linewidth=0.7, color='b', label='ND')
+    ax.hist(ticks, bins=len(ticks), weights=ticks_fd, histtype='step', linewidth=0.7, color='r', label='FD')
+    ax.set_ylabel("ADC", fontsize=14)
+    ax.set_xlabel("tick", fontsize=14)
+
+    plt.title("Channel {} in ROP".format(ch), fontsize=16)
+
+    handles, labels = ax.get_legend_handles_labels()
+    new_handles = [Line2D([], [], c=h.get_edgecolor()) for h in handles]
+    plt.legend(handles=new_handles, labels=labels, prop={'size': 12})
+
     plt.show()
     
 def parse_arguments():
