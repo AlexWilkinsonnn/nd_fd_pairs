@@ -7,6 +7,7 @@ from matplotlib.lines import Line2D
 plt.rc('font', family='serif')
 
 def main(INPUT_DIR, N):
+  diffs = []
   for i, entry in enumerate(os.scandir(INPUT_DIR)):
     if not entry.name.endswith(".npy"):
       continue
@@ -21,6 +22,20 @@ def main(INPUT_DIR, N):
 
     arr_nd = arr_nd[16:-16, 58:-58]
     arr_fd = arr_fd[16:-16, 58:-58]
+    
+    # Looking at tick shift (coming from somewhere inside WireCell that can de accessed in LArSoft so stuck with for now)
+    # for i, (row_nd, row_fd) in enumerate(zip(arr_nd, arr_fd)):
+    #   if row_nd.sum() > 100:
+    #     if (np.max(np.argwhere(row_nd > 0)) - np.min(np.argwhere(row_nd > 0))) > 10:
+    #       continue
+    #     if np.abs(np.argmax(row_fd) - np.argmax(row_nd)) > 52:
+    #       continue
+    #     if np.abs(np.argmax(row_fd) - np.argmax(row_nd)) < 47:
+    #       continue
+    #     diffs.append(np.argmax(row_fd) - np.argmax(row_nd))
+    # # if entry.name != "20ndfd.npy":
+    # #   continue
+    # continue
 
     # Manipulate array
     # arr_fd = np.flip(arr_fd, 1)
@@ -73,7 +88,11 @@ def main(INPUT_DIR, N):
     plt.legend(handles=new_handles, labels=labels, prop={'size': 12})
 
     plt.show()
-    
+
+  # Looking at tick shift  
+  # print(diffs)
+  # print("{} +- {}".format(np.mean(diffs), np.std(diffs)))
+
 def parse_arguments():
     parser = argparse.ArgumentParser()
 
