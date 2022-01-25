@@ -31,6 +31,9 @@ def main(FD_DIR, ND_DIR, OUT_DIR): # Verify all is looking good then do matching
       raise Exception
 
     arrA = np.load(entry_nd.path)
+    # Align ND packets with FD waveforms
+    arrA = np.roll(arrA, 52, 1)
+    arrA[:, :, (4492 + 58):(4492 + 58 + 52)] = 0
 
     arrB = np.zeros((1, 512, 4608))
     with open(entry_fd.path, 'r') as f:
