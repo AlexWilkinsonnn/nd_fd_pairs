@@ -2,7 +2,7 @@ import os, argparse, csv, re, sys
 
 import numpy as np
 
-def main(FD_DIR, ND_DIR, OUT_DIR): # Verify all is looking good then do matching
+def main(FD_DIR, ND_DIR, OUT_DIR, N): # Verify all is looking good then do matching
   N_fd = len(os.listdir(FD_DIR))
   N_nd = len(os.listdir(ND_DIR))
   if N_fd != N_nd:
@@ -14,6 +14,9 @@ def main(FD_DIR, ND_DIR, OUT_DIR): # Verify all is looking good then do matching
 
   sorted_scandir = lambda dir : sorted(os.scandir(dir), key=lambda entry: entry.name)
   for i, (entry_fd, entry_nd) in enumerate(zip(sorted_scandir(FD_DIR), sorted_scandir(ND_DIR))):
+    if N and i >= N:
+      break
+
     print("[{}/{}]".format(i + 1, N_fd), end='\r')
 
     if not re.match("^FD_detsim_[0-9]+.csv$", entry_fd.name):
@@ -32,14 +35,14 @@ def main(FD_DIR, ND_DIR, OUT_DIR): # Verify all is looking good then do matching
 
     arrA = np.load(entry_nd.path)
     # Align ND packets with FD waveforms
-    arrA = np.roll(arrA, 52, 1)
-    arrA[:, :, (4492 + 58):(4492 + 58 + 52)] = 0
+    arrA = np.roll(arrA, -7, 2)
+    arrA[:, :, (4492 + 58):(4492 + 58 - 7)] = 0
 
     arrB = np.zeros((1, 512, 4608))
     with open(entry_fd.path, 'r') as f:
       f_reader = csv.reader(f)
       for line in f_reader:
-        arrB[0, int(line[0]) + 16, int(line[1]) + 112] = float(line[2])
+        arrB[0, int(line[0]) + 16, int(line[1]) + 58] = float(line[2])
 
     arr_aligned = np.concatenate([arrA, arrB], 2)
     np.save(os.path.join(OUT_DIR, "{}ndfd.npy".format(id_fd)), arr_aligned)
@@ -51,13 +54,14 @@ def parse_arguments():
     parser.add_argument("nd_dir")
     parser.add_argument("out_dir")
 
+    parser.add_argument("-n", type=int, default=0)
     # group1 = parser.add_mutually_exclusive_group()
     # group1.add_argument("--induction", action='store_true')
     # group1.add_argument("--collection", action='store_true')
 
     args = parser.parse_args()
 
-    return (args.fd_dir, args.nd_dir, args.out_dir)
+    return (args.fd_dir, args.nd_dir, args.out_dir, args.n)
 
 if __name__ == "__main__":
     arguments = parse_arguments()
