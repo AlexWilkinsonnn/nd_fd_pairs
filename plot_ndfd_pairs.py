@@ -7,7 +7,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 plt.rc('font', family='serif')
 
-def main(INPUT_DIR, N, NICE_PLOT):
+def main(INPUT_DIR, N, NICE_PLOT, OVERLAY):
   diffs = []
   for i, entry in enumerate(os.scandir(INPUT_DIR)):
     if not entry.name.endswith(".npy"):
@@ -23,6 +23,27 @@ def main(INPUT_DIR, N, NICE_PLOT):
 
     arr_nd = arr_nd[16:-16, 58:-58]
     arr_fd = arr_fd[16:-16, 58:-58]
+
+    if OVERLAY:
+      # Cropping
+      non_zeros = np.nonzero(arr_nd)
+      ch_min = non_zeros[0].min() - 10 if (non_zeros[0].min() - 10) > 0 else 0
+      ch_max = non_zeros[0].max() + 11 if (non_zeros[0].max() + 11) < 480 else 480
+      tick_min = non_zeros[1].min() - 50 if (non_zeros[1].min() - 50) > 0 else 0
+      tick_max = non_zeros[1].max() + 51 if (non_zeros[1].max() + 51) < 4492 else 4492
+      arr_nd = arr_nd[ch_min:ch_max, tick_min:tick_max]
+      arr_fd = arr_fd[ch_min:ch_max, tick_min:tick_max]
+
+      fig, ax = plt.subplots(1, 1, figsize=(12, 12), tight_layout=True)
+
+      arr_nd[arr_nd != 0] = 100
+
+      ax.imshow(arr_fd.T, cmap='coolwarm', aspect='auto', interpolation='none', origin='lower', alpha=0.6, vmin=-100, vmax=100)
+      ax.imshow(np.ma.masked_where(arr_nd == 0, arr_nd).T, cmap='Blues', aspect='auto', interpolation='none', origin='lower', vmin=0, vmax=100)
+     
+      plt.show()
+
+      continue
 
     if NICE_PLOT: # Plot for presentations
       if entry.name not in ['1ndfd.npy', '14ndfd.npy']:
@@ -102,9 +123,9 @@ def main(INPUT_DIR, N, NICE_PLOT):
     #   if row_nd.sum() > 100:
     #     if (np.max(np.argwhere(row_nd > 0)) - np.min(np.argwhere(row_nd > 0))) > 10:
     #       continue
-    #     if np.abs(np.argmax(row_fd) - np.argmax(row_nd)) > 52:
+    #     if np.abs(np.argmax(row_fd) - np.argmax(row_nd)) > 100:
     #       continue
-    #     if np.abs(np.argmax(row_fd) - np.argmax(row_nd)) < 47:
+    #     if np.abs(np.argmax(row_fd) - np.argmax(row_nd)) < 0:
     #       continue
     #     diffs.append(np.argmax(row_fd) - np.argmax(row_nd))
     # # if entry.name != "20ndfd.npy":
@@ -174,6 +195,7 @@ def parse_arguments():
 
     parser.add_argument("-n", type=int, default=0, dest='n')
     parser.add_argument("--nice_plot", action='store_true')
+    parser.add_argument("--overlay", action='store_true')
 
     # group1 = parser.add_mutually_exclusive_group()
     # group1.add_argument("--induction", action='store_true')
@@ -181,7 +203,7 @@ def parse_arguments():
 
     args = parser.parse_args()
 
-    return (args.input_dir, args.n, args.nice_plot)
+    return (args.input_dir, args.n, args.nice_plot, args.overlay)
 
 if __name__ == "__main__":
     arguments = parse_arguments()
