@@ -15,9 +15,13 @@ def main(FD_DIR, ND_DIR, OUT_DIR, N): # Verify all is looking good then do match
   sorted_scandir = lambda dir : sorted(os.scandir(dir), key=lambda entry: entry.name)
   for i, (entry_fd, entry_nd) in enumerate(zip(sorted_scandir(FD_DIR), sorted_scandir(ND_DIR))):
     if N and i >= N:
+      print("[{}/{}]".format(i, N_fd))
       break
 
-    print("[{}/{}]".format(i + 1, N_fd), end='\r')
+    if i + 1 == N_fd:
+      print("[{}/{}]".format(i + 1, N_fd))
+    else:  
+      print("[{}/{}]".format(i + 1, N_fd), end='\r')
 
     if not re.match("^FD_detsim_[0-9]+.csv$", entry_fd.name):
       print("WARNING: invalid filename: {}".format(entry_fd.name))
