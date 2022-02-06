@@ -39,8 +39,8 @@ def main(FD_DIR, ND_DIR, OUT_DIR, N): # Verify all is looking good then do match
 
     arrA = np.load(entry_nd.path)
     # Align ND packets with FD waveforms
-    arrA = np.roll(arrA, -7, 2)
-    arrA[:, :, (4492 + 58):(4492 + 58 - 7)] = 0
+    # arrA = np.roll(arrA, -7, 2)
+    # arrA[:, :, (4492 + 58):(4492 + 58 - 7)] = 0
 
     arrB = np.zeros((1, 512, 4608))
     with open(entry_fd.path, 'r') as f:
