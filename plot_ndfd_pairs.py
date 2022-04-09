@@ -7,7 +7,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 plt.rc('font', family='serif')
 
-def main(INPUT_DIR, N, NICE_PLOT, OVERLAY):
+def main(INPUT_DIR, N, NICE_PLOT, OVERLAY, FD_DIR):
   diffs = []
   for i, entry in enumerate(os.scandir(INPUT_DIR)):
     if not entry.name.endswith(".npy"):
@@ -16,13 +16,31 @@ def main(INPUT_DIR, N, NICE_PLOT, OVERLAY):
       break
     
     print(entry.name, end='\r')
+    if FD_DIR:
+      arr_nd = np.load(entry.path)
+      arr_nd = arr_nd[0, :, :]
 
-    arr_ndfd = np.load(entry.path)
-    arr_nd = arr_ndfd[0, :, :4608]
-    arr_fd = arr_ndfd[0, :, 4608:]
+      num = int(entry.name[:-6])
+      arr_fd = np.load(os.path.join(FD_DIR, '{}fd.npy'.format(num)))
+      arr_fd = arr_fd[0, :, :]
 
-    arr_nd = arr_nd[16:-16, 58:-58]
-    arr_fd = arr_fd[16:-16, 58:-58]
+    else:
+      arr_ndfd = np.load(entry.path)
+      arr_nd = arr_ndfd[0, :, :4608]
+      arr_fd = arr_ndfd[0, :, 4608:]
+
+    if arr_nd.shape[0] == 512:
+      arr_nd = arr_nd[16:-16, 58:-58]
+      arr_fd = arr_fd[16:-16, 58:-58]
+      cmap = 'viridis'
+      vmin, vmax = np.min(arr_fd), np.max(arr_fd)
+      
+    elif arr_nd.shape[0] == 1024:
+      arr_nd = arr_nd[112:-112, 58:-58]
+      arr_fd = arr_fd[112:-112, 58:-58]
+      cmap = 'seismic'
+      fd_abs_max = np.max(np.abs(arr_fd))
+      vmin, vmax = -fd_abs_max, fd_abs_max
 
     if OVERLAY:
       # Cropping
@@ -153,7 +171,7 @@ def main(INPUT_DIR, N, NICE_PLOT, OVERLAY):
     ax[0].imshow(np.ma.masked_where(arr_nd == 0, arr_nd).T, cmap='viridis', aspect='auto', interpolation='none', origin='lower')
     ax[0].set_title("ND")
 
-    ax[1].imshow(arr_fd.T, cmap='viridis', aspect='auto', interpolation='none', origin='lower')
+    ax[1].imshow(arr_fd.T, cmap=cmap, aspect='auto', interpolation='none', origin='lower', vmin=vmin, vmax=vmax)
     ax[1].set_title("FD")
 
     fig.tight_layout()
@@ -196,6 +214,7 @@ def parse_arguments():
     parser.add_argument("-n", type=int, default=0, dest='n')
     parser.add_argument("--nice_plot", action='store_true')
     parser.add_argument("--overlay", action='store_true')
+    parser.add_argument("--separate_fd_dir", type=str, default='')
 
     # group1 = parser.add_mutually_exclusive_group()
     # group1.add_argument("--induction", action='store_true')
@@ -203,7 +222,7 @@ def parse_arguments():
 
     args = parser.parse_args()
 
-    return (args.input_dir, args.n, args.nice_plot, args.overlay)
+    return (args.input_dir, args.n, args.nice_plot, args.overlay, args.separate_fd_dir)
 
 if __name__ == "__main__":
     arguments = parse_arguments()
