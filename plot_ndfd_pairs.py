@@ -7,7 +7,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 plt.rc('font', family='serif')
 
-def main(INPUT_DIR, N, NSKIP, NICE_PLOT, OVERLAY, FD_DIR):
+def main(INPUT_DIR, N, NSKIP, NICE_PLOT, OVERLAY, FD_DIR, ND_DEPO_DIR):
   diffs = []
   for i, entry in enumerate(os.scandir(INPUT_DIR)):
     if i < NSKIP:
@@ -30,6 +30,11 @@ def main(INPUT_DIR, N, NSKIP, NICE_PLOT, OVERLAY, FD_DIR):
       arr_ndfd = np.load(entry.path)
       arr_nd = arr_ndfd[0, :, :4608]
       arr_fd = arr_ndfd[0, :, 4608:]
+
+    if ND_DEPO_DIR:
+      num = int(entry.name[:-6])
+      arr_depo = np.load(os.path.join(ND_DEPO_DIR, '{}depo.npy'.format(num)))
+      arr_depo = arr_depo[0, :, :]
 
     if arr_nd.shape[0] == 512:
       arr_nd = arr_nd[16:-16, 58:-58]
@@ -168,6 +173,66 @@ def main(INPUT_DIR, N, NSKIP, NICE_PLOT, OVERLAY, FD_DIR):
     # #     break
     # arr_nd = arr_nd_newres[:, 3251:3251 + 4492]
 
+    if ND_DEPO_DIR:
+      fig, ax = plt.subplots(1, 3)
+
+
+      ax[0].imshow(np.ma.masked_where(arr_depo == 0, arr_depo).T, cmap='viridis', aspect='auto', interpolation='none', origin='lower')
+      ax[0].set_title("Depos")
+
+      ax[1].imshow(np.ma.masked_where(arr_nd == 0, arr_nd).T, cmap='viridis', aspect='auto', interpolation='none', origin='lower')
+      ax[1].set_title("ND")
+
+      ax[2].imshow(arr_fd.T, cmap=cmap, aspect='auto', interpolation='none', origin='lower', vmin=vmin, vmax=vmax)
+      ax[2].set_title("FD")
+
+      fig.tight_layout()
+      plt.show()
+
+      ch = (0, 0)
+      for i, col in enumerate(arr_nd):
+        if np.abs(col).sum() > ch[1]:
+          ch = (i, np.abs(col).sum())
+      ch = ch[0]
+
+      ticks_nd = arr_nd[ch, :]
+      ticks_fd = arr_fd[ch, :]
+      ticks_depo = arr_depo[ch, :]
+      ticks = np.arange(1, arr_nd.shape[1] + 1)
+
+      fig, ax = plt.subplots(tight_layout=True)
+
+      ax.hist(ticks, bins=len(ticks), weights=ticks_nd, histtype='step', linewidth=0.7, color='b', label='ND')
+      ax.hist(ticks, bins=len(ticks), weights=ticks_fd, histtype='step', linewidth=0.7, color='r', label='FD')
+      ax.set_ylabel("ADC", fontsize=14)
+      ax.set_xlabel("tick", fontsize=14)
+
+      ax2 = ax.twinx()
+      ax2.hist(ticks, bins=len(ticks), weights=ticks_depo, histtype='step', linewidth=0.7, color='g', label='Depos')
+      ax2.set_ylabel("electrons")
+  
+      ax_ylims = ax.axes.get_ylim()
+      ax_yratio = ax_ylims[0] / ax_ylims[1]
+      ax2_ylims = ax2.axes.get_ylim()
+      ax2_yratio = ax2_ylims[0] / ax2_ylims[1]
+      if ax_yratio < ax2_yratio:
+        ax2.set_ylim(bottom=ax2_ylims[1]*ax_yratio)
+      else:
+        ax.set_ylim(bottom=ax_ylims[1]*ax2_yratio)
+
+      plt.title("Channel {} in ROP".format(ch), fontsize=16)
+
+      handles, labels = ax.get_legend_handles_labels()
+      handles2, labels2 = ax2.get_legend_handles_labels()
+      handles += handles2
+      labels += labels2
+      new_handles = [Line2D([], [], c=h.get_edgecolor()) for h in handles]
+      plt.legend(handles=new_handles, labels=labels, prop={'size': 12})
+
+      plt.show()
+
+      continue
+
     fig, ax = plt.subplots(1, 2)
 
     ax[0].imshow(np.ma.masked_where(arr_nd == 0, arr_nd).T, cmap='viridis', aspect='auto', interpolation='none', origin='lower')
@@ -218,6 +283,7 @@ def parse_arguments():
     parser.add_argument("--nice_plot", action='store_true')
     parser.add_argument("--overlay", action='store_true')
     parser.add_argument("--separate_fd_dir", type=str, default='')
+    parser.add_argument("--nd_depo_dir", type=str, default='')
 
     # group1 = parser.add_mutually_exclusive_group()
     # group1.add_argument("--induction", action='store_true')
@@ -225,7 +291,7 @@ def parse_arguments():
 
     args = parser.parse_args()
 
-    return (args.input_dir, args.n, args.nskip, args.nice_plot, args.overlay, args.separate_fd_dir)
+    return (args.input_dir, args.n, args.nskip, args.nice_plot, args.overlay, args.separate_fd_dir, args.nd_depo_dir)
 
 if __name__ == "__main__":
     arguments = parse_arguments()
