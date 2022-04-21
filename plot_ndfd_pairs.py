@@ -7,14 +7,16 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 plt.rc('font', family='serif')
 
-def main(INPUT_DIR, N, NICE_PLOT, OVERLAY, FD_DIR):
+def main(INPUT_DIR, N, NSKIP, NICE_PLOT, OVERLAY, FD_DIR):
   diffs = []
   for i, entry in enumerate(os.scandir(INPUT_DIR)):
+    if i < NSKIP:
+      continue
+    if N and i >= N + NSKIP:
+      break
     if not entry.name.endswith(".npy"):
       continue
-    if N and i >=N:
-      break
-    
+
     print(entry.name, end='\r')
     if FD_DIR:
       arr_nd = np.load(entry.path)
@@ -212,6 +214,7 @@ def parse_arguments():
     parser.add_argument("input_dir")
 
     parser.add_argument("-n", type=int, default=0, dest='n')
+    parser.add_argument("--nskip", type=int, default=0)
     parser.add_argument("--nice_plot", action='store_true')
     parser.add_argument("--overlay", action='store_true')
     parser.add_argument("--separate_fd_dir", type=str, default='')
@@ -222,7 +225,7 @@ def parse_arguments():
 
     args = parser.parse_args()
 
-    return (args.input_dir, args.n, args.nice_plot, args.overlay, args.separate_fd_dir)
+    return (args.input_dir, args.n, args.nskip, args.nice_plot, args.overlay, args.separate_fd_dir)
 
 if __name__ == "__main__":
     arguments = parse_arguments()
