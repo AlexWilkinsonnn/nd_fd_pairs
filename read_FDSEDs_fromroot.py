@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 def main(INPUT_FILE, N, OUTPUT_DIR):
   f = ROOT.TFile.Open(INPUT_FILE, "READ")
-  t = f.Get("exportdigits/digits")
+  t = f.Get("exportdigits/seds")
   
   out_dir_Z = os.path.join(OUTPUT_DIR, 'Z')
   out_dir_U = os.path.join(OUTPUT_DIR, 'U')
@@ -25,21 +25,18 @@ def main(INPUT_FILE, N, OUTPUT_DIR):
     arrZ = np.zeros((1, 512, 4608))
     arrU = np.zeros((1, 1024, 4608))
     arrV = np.zeros((1, 1024, 4608))
-    for ch, dig_vec in enumerate(event.digit_vecsZ):
-      for tick, adc in enumerate(dig_vec):
-        arrZ[0, ch + 16, tick + 58] = adc
-      
-    for ch, dig_vec in enumerate(event.digit_vecsU):
-      for tick, adc in enumerate(dig_vec):
-        arrU[0, ch + 112, tick + 58] = adc
+    for sed in event.sedsZ:
+      arrZ[0, sed[0] + 16, sed[1] + 58] += sed[2]
 
-    for ch, dig_vec in enumerate(event.digit_vecsV):
-      for tick, adc in enumerate(dig_vec):
-        arrV[0, ch + 112, tick + 58] = adc
-        
-    np.save(os.path.join(out_dir_Z, "FD_detsimZ_{}.npy".format(id)), arrZ)
-    np.save(os.path.join(out_dir_U, "FD_detsimU_{}.npy".format(id)), arrU)
-    np.save(os.path.join(out_dir_V, "FD_detsimV_{}.npy".format(id)), arrV)
+    for sed in event.sedsU:
+      arrU[0, sed[0] + 16, sed[1] + 58] += sed[2]
+
+    for sed in event.sedsV:
+      arrV[0, sed[0] + 16, sed[1] + 58] += sed[2]
+
+    np.save(os.path.join(out_dir_Z, "ND_deposZ_{}.npy".format(id)), arrZ)
+    np.save(os.path.join(out_dir_U, "ND_deposU_{}.npy".format(id)), arrU)
+    np.save(os.path.join(out_dir_V, "ND_deposV_{}.npy".format(id)), arrV)
 
 def parse_arguments():
   parser = argparse.ArgumentParser()
