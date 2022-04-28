@@ -17,12 +17,12 @@ def main(INPUT_DIR, ND_CH0_ADC, ND_CH3_STACKED, ND_CH4_FIRSTTRIGGER):
       min_adcs.append(np.min(arr[0]))
 
     if ND_CH3_STACKED:
-      max_adcs.append(np.max(arr[3]))
-      min_adcs.append(np.min(arr[3]))
+      max_num_stacked.append(np.max(arr[3]))
+      min_num_stacked.append(np.min(arr[3]))
 
     if ND_CH4_FIRSTTRIGGER:
-      max_adcs.append(np.max(arr[4]))
-      min_adcs.append(np.min(arr[4]))
+      max_num_firsttriggers.append(np.max(arr[4]))
+      min_num_firsttriggers.append(np.min(arr[4]))
 
   if ND_CH0_ADC:
     print("min adc = {}, max adc = {}".format(min(min_adcs), max(max_adcs)))
