@@ -26,12 +26,15 @@ def main(INPUT_DIR, ND_CH0_ADC, ND_CH3_STACKED, ND_CH4_FIRSTTRIGGER):
 
   if ND_CH0_ADC:
     print("min adc = {}, max adc = {}".format(min(min_adcs), max(max_adcs)))
+    print("1/max = {}\n".format(1/max(max_adcs)))
 
   if ND_CH3_STACKED:
-    print("min num stacked = {}, max num stacked = {}".format(min(min_num_stacket), max(max_num_stacked)))
+    print("min num stacked = {}, max num stacked = {}".format(min(min_num_stacked), max(max_num_stacked)))
+    print("1/max = {}\n".format(1/max(max_num_stacked)))
 
   if ND_CH4_FIRSTTRIGGER:
-    print("min num first triggers = {}, max num first triggers = {}".format(min(min_num_stacket), max(max_num_firsttriggers)))
+    print("min num first triggers = {}, max num first triggers = {}".format(min(min_num_firsttriggers), max(max_num_firsttriggers)))
+    print("1/max = {}\n".format(1/max(max_num_firsttriggers)))
 
 def parse_arguments():
 
