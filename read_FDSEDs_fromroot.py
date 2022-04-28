@@ -29,10 +29,10 @@ def main(INPUT_FILE, N, OUTPUT_DIR):
       arrZ[0, sed[0] + 16, sed[1] + 58] += sed[2]
 
     for sed in event.sedsU:
-      arrU[0, sed[0] + 16, sed[1] + 58] += sed[2]
+      arrU[0, sed[0] + 112, sed[1] + 58] += sed[2]
 
     for sed in event.sedsV:
-      arrV[0, sed[0] + 16, sed[1] + 58] += sed[2]
+      arrV[0, sed[0] + 112, sed[1] + 58] += sed[2]
 
     np.save(os.path.join(out_dir_Z, "ND_deposZ_{}.npy".format(id)), arrZ)
     np.save(os.path.join(out_dir_U, "ND_deposU_{}.npy".format(id)), arrU)

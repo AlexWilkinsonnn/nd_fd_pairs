@@ -41,6 +41,8 @@ def main(INPUT_DIR, N, NSKIP, NICE_PLOT, OVERLAY, FD_DIR, ND_DEPO_DIR):
       arr_fd = arr_fd[16:-16, 58:-58]
       cmap = 'viridis'
       vmin, vmax = np.min(arr_fd), np.max(arr_fd)
+      if ND_DEPO_DIR:
+        arr_depo = arr_depo[16:-16, 58:-58]
       
     elif arr_nd.shape[0] == 1024:
       arr_nd = arr_nd[112:-112, 58:-58]
@@ -48,6 +50,8 @@ def main(INPUT_DIR, N, NSKIP, NICE_PLOT, OVERLAY, FD_DIR, ND_DEPO_DIR):
       cmap = 'seismic'
       fd_abs_max = np.max(np.abs(arr_fd))
       vmin, vmax = -fd_abs_max, fd_abs_max
+      if ND_DEPO_DIR:
+        arr_depo = arr_depo[112:-112, 58:-58]
 
     if OVERLAY:
       # Cropping
@@ -175,7 +179,6 @@ def main(INPUT_DIR, N, NSKIP, NICE_PLOT, OVERLAY, FD_DIR, ND_DEPO_DIR):
 
     if ND_DEPO_DIR:
       fig, ax = plt.subplots(1, 3)
-
 
       ax[0].imshow(np.ma.masked_where(arr_depo == 0, arr_depo).T, cmap='viridis', aspect='auto', interpolation='none', origin='lower')
       ax[0].set_title("Depos")
