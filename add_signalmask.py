@@ -2,6 +2,7 @@ import os, argparse, re
 
 import numpy as np
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 import sparse
 
 def load_nd_fd(entry_nd, dir_fd, only_nd=False):
@@ -30,7 +31,7 @@ def get_nd_mask(arr_nd, max_tick_shift, max_ch_shift):
     return nd_mask
 
 def main(INPUT_DIR_ND, INPUT_DIR_FD, COLLECTION, PLOT):
-    for entry_nd in os.scandir(INPUT_DIR_ND):
+    for entry_nd in tqdm(os.scandir(INPUT_DIR_ND)):
         if PLOT:
             arr_nd, arr_fd = load_nd_fd(entry_nd, INPUT_DIR_FD)
         else:
@@ -58,7 +59,7 @@ def main(INPUT_DIR_ND, INPUT_DIR_FD, COLLECTION, PLOT):
         arr_nd_mask = np.concatenate((arr_nd, np.expand_dims(nd_mask, axis=0)), 0)
 
         S_nd_mask = sparse.COO.from_numpy(arr_nd_mask)
-        sparse.save_npz(entry.path, S_nd_mask)
+        sparse.save_npz(entry_nd.path, S_nd_mask)
     
 def parse_arguments():
     parser = argparse.ArgumentParser(description="add a signal mask made with the nd packets")
