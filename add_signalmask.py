@@ -8,6 +8,9 @@ import sparse
 def load_nd_fd(entry_nd, dir_fd, only_nd=False):
     arr_nd = sparse.load_npz(entry_nd.path).todense()
 
+    if arr_nd.shape[0] == 6: # Already has mask, want to replace it
+        arr_nd = arr_nd[:-1]
+
     if only_nd:
         return arr_nd
 
