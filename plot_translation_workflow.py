@@ -72,13 +72,13 @@ def main(ND_PROJECTIONS, EVENTID, FD_Z, FD_U, FD_V, OUT_DIR, SHOW_ONLY):
     
     nd_Z = np.zeros((480, 4492))
     for ch, tick, adc in nd_packets_projection['Z']:
-        nd_Z[ch, tick] += adc
+        nd_Z[ch, tick-2:tick+3] += adc
     nd_U = np.zeros((800, 4492))
     for ch, tick, adc in nd_packets_projection['U']:
-        nd_U[ch, tick] += adc
+        nd_U[ch, tick-2:tick+3] += adc
     nd_V = np.zeros((800, 4492))
     for ch, tick, adc in nd_packets_projection['V']:
-        nd_V[ch, tick] += adc
+        nd_V[ch, tick-2:tick+3] += adc
 
     fd_Z = np.load(FD_Z)[0, 16:-16, 58:-58]
     fd_U = np.load(FD_U)[0, 112:-112, 58:-58]
