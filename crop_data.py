@@ -7,9 +7,21 @@ import sparse
 def main(ND_INPUT_DIR, ND_OUTPUT_DIR, FD_INPUT_DIR, FD_OUTPUT_DIR, TICKSCALEDOWN, REMOVE_MASK):
     num_skipped = 0
 
-    for entry_nd, entry_fd in tqdm(zip(os.scandir(ND_INPUT_DIR), os.scandir(FD_INPUT_DIR))):
-        arr_nd = sparse.load_npz(entry_nd.path).todense()
-        arr_fd = np.load(entry_fd.path)
+    sorted_scandir = lambda dir : sorted(os.scandir(dir), key=lambda entry: entry.name)
+    sorted_nd_dir_paths = [ entry.path for entry in list(sorted_scandir(ND_INPUT_DIR)) ]
+    sorted_fd_dir_paths = [ entry.path for entry in list(sorted_scandir(FD_INPUT_DIR)) ]
+
+    for entry_nd_path, entry_fd_path in tqdm(zip(sorted_nd_dir_paths, sorted_fd_dir_paths)):
+        entry_nd_name, entry_fd_name = os.path.basename(entry_nd_path), os.path.basename(entry_fd_path)
+        id_fd = int(entry_fd_name.split('fd')[0])
+        id_nd = int(entry_nd_name.split('nd')[0])
+
+        if id_fd != id_nd:
+          print("WARNING: mismatching indices: {} and {}".format(id_fd, id_nd))
+          raise Exception
+
+        arr_nd = sparse.load_npz(entry_nd_path).todense()
+        arr_fd = np.load(entry_fd_path)
 
         if REMOVE_MASK:
             arr_nd = arr_nd[:-1] 
@@ -23,9 +35,9 @@ def main(ND_INPUT_DIR, ND_OUTPUT_DIR, FD_INPUT_DIR, FD_OUTPUT_DIR, TICKSCALEDOWN
                 continue
 
             S = sparse.COO.from_numpy(arr_nd)
-            sparse.save_npz(os.path.join(ND_OUTPUT_DIR, entry_nd.name), S)
+            sparse.save_npz(os.path.join(ND_OUTPUT_DIR, entry_nd_name), S)
 
-            np.save(os.path.join(FD_OUTPUT_DIR, entry_fd.name), arr_fd)
+            np.save(os.path.join(FD_OUTPUT_DIR, entry_fd_name), arr_fd)
 
     print("Skipped {} events".format(num_skipped))
 
