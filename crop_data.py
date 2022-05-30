@@ -28,7 +28,7 @@ def main(ND_INPUT_DIR, ND_OUTPUT_DIR, FD_INPUT_DIR, FD_OUTPUT_DIR, TICKSCALEDOWN
 
         if TICKSCALEDOWN:
             arr_nd = arr_nd[:, 560:1440, 17500:22500]
-            arr_fd = arr_fd[:, 140:340, 1750:2250]
+            arr_fd = arr_fd[:, 130:350, 1750:2250]
 
             if arr_nd[0].sum() < 60:
                 num_skipped += 1
