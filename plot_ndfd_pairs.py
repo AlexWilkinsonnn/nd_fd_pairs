@@ -155,7 +155,7 @@ def main(INPUT_DIR, N, NSKIP, NICE_PLOT, OVERLAY, FD_DIR, ND_DEPO_DIR, DOWNRES):
             fig, ax = plt.subplots(1, 2, figsize=(16, 6), tight_layout=True)
         
             ax[0].imshow(np.ma.masked_where(arr_nd_smear == 0, arr_nd_smear).T, cmap='viridis', interpolation='none', aspect='auto', origin='lower')
-            ax[1].imshow(arr_fd.T, cmap='viridis', interpolation='none', aspect='auto', origin='lower')
+            ax[1].imshow(arr_fd[16:-16, 58:-58].T, cmap='viridis', interpolation='none', aspect='auto', origin='lower')
 
             plt.show()
 
