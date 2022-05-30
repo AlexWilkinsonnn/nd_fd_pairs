@@ -4,6 +4,17 @@ import numpy as np
 from tqdm import tqdm
 import sparse
 
+def remove_padding(wireplane_arr):
+    if wireplane_arr.shape[1] == 512:
+        wireplane_arr = wireplane_arr[:, 16:-16, :]
+    elif wireplane_arr.shape[1] == 1024:
+        wireplane_arr = wireplane_arr[:, 112:-112, :]
+
+    if wireplane_arr.shape[2] == 4608:
+        wireplane_arr = wireplane_arr[:, :, 58:-58]
+
+    return wireplane_arr
+
 def main(ND_INPUT_DIR, ND_OUTPUT_DIR, FD_INPUT_DIR, FD_OUTPUT_DIR, TICKSCALEDOWN, REMOVE_MASK):
     num_skipped = 0
 
@@ -15,7 +26,6 @@ def main(ND_INPUT_DIR, ND_OUTPUT_DIR, FD_INPUT_DIR, FD_OUTPUT_DIR, TICKSCALEDOWN
         entry_nd_name, entry_fd_name = os.path.basename(entry_nd_path), os.path.basename(entry_fd_path)
         id_fd = int(entry_fd_name.split('fd')[0])
         id_nd = int(entry_nd_name.split('nd')[0])
-
         if id_fd != id_nd:
           print("WARNING: mismatching indices: {} and {}".format(id_fd, id_nd))
           raise Exception
@@ -27,6 +37,8 @@ def main(ND_INPUT_DIR, ND_OUTPUT_DIR, FD_INPUT_DIR, FD_OUTPUT_DIR, TICKSCALEDOWN
             arr_nd = arr_nd[:-1] 
 
         if TICKSCALEDOWN:
+            arr_nd = remove_padding(arr_nd)
+
             arr_nd = arr_nd[:, 560:1440, 17500:22500]
             arr_fd = arr_fd[:, 130:350, 1750:2250]
 
