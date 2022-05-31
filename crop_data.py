@@ -37,7 +37,7 @@ def main(ND_INPUT_DIR, ND_OUTPUT_DIR, FD_INPUT_DIR, FD_OUTPUT_DIR, TICKSCALEDOWN
             arr_nd = arr_nd[:-1] 
 
         if TICKSCALEDOWN:
-            arr_nd = remove_padding(arr_nd)
+            arr_fd = remove_padding(arr_fd)
 
             arr_nd = arr_nd[:, 560:1440, 17500:22500]
             arr_fd = arr_fd[:, 140:360, 1750:2250]
