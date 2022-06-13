@@ -148,15 +148,70 @@ def main(INPUT_DIR, N, NSKIP, NICE_PLOT, OVERLAY, FD_DIR, ND_DEPO_DIR, DOWNRES):
                 continue
 
         if DOWNRES:
-            arr_nd_smear = arr_nd.copy()
-            for i in range(5):
-                arr_nd_smear += np.roll(arr_nd_smear, i + 1, 1)  
+            # arr_nd_smear = arr_nd.copy()
+            # for i in range(5):
+            #     arr_nd_smear += np.roll(arr_nd_smear, i + 1, 1)  
 
             fig, ax = plt.subplots(1, 2, figsize=(16, 6), tight_layout=True)
-        
-            ax[0].imshow(np.ma.masked_where(arr_nd_smear == 0, arr_nd_smear).T, cmap='viridis', interpolation='none', aspect='auto', origin='lower')
-            ax[1].imshow(arr_fd.T, cmap='viridis', interpolation='none', aspect='auto', origin='lower')
 
+            if 'Z' in entry.path.split('/')[-2]:
+                cmap = 'viridis'
+                vmin = arr_fd.min()
+                vmax = arr_fd.max()
+            elif ('U' in entry.path.split('/')[-2]) or ('V' in entry.path.split('/')[-2]):
+                cmap = 'seismic'
+                vmin = -np.abs(arr_fd).max()
+                vmax = np.abs(arr_fd).max()
+        
+            ax[0].imshow(np.ma.masked_where(arr_nd == 0, arr_nd).T, cmap='viridis', interpolation='none', aspect='auto', origin='lower')
+            ax[1].imshow(arr_fd.T, cmap=cmap, interpolation='none', aspect='auto', origin='lower', vmin=vmin, vmax=vmax)
+
+            plt.show()
+
+            # Assumming (8,8) upresolution
+            arr_nd_downres = np.zeros((int(arr_nd.shape[0]/8), int(arr_nd.shape[1]/8)))
+            for ch, ch_vec in enumerate(arr_nd): 
+                for tick, adc in enumerate(ch_vec): 
+                    arr_nd_downres[int(ch/8), int(tick/8)] += adc 
+            arr_nd = arr_nd_downres 
+
+            ch = (0, 0)
+            for idx, col in enumerate(arr_nd):
+                if np.abs(col).sum() > ch[1]:
+                    ch = (idx, np.abs(col).sum())
+            ch = ch[0]
+
+            tick_adc_fd = arr_fd[ch, :]
+            tick_adc_nd = arr_nd[ch, :]
+            ticks = np.arange(1, arr_nd.shape[1] + 1)
+
+            fig, ax = plt.subplots()
+
+            ax.hist(ticks, bins=len(ticks), weights=tick_adc_nd, histtype='step', label='ND', linewidth=0.8, color='g')
+            ax.set_ylabel("ND ADC", fontsize=14)
+            ax.set_xlabel("tick", fontsize=14)
+            
+            ax2 = ax.twinx()
+            ax2.hist(ticks, bins=len(ticks), weights=tick_adc_fd, histtype='step', label='FD', linewidth=0.8, color='r')
+            ax2.set_ylabel("FD ADC", fontsize=14)
+
+            ax_ylims = ax.axes.get_ylim()
+            ax_yratio = ax_ylims[0] / ax_ylims[1]
+            ax2_ylims = ax2.axes.get_ylim()
+            ax2_yratio = ax2_ylims[0] / ax2_ylims[1]
+            if ax_yratio < ax2_yratio:
+                ax2.set_ylim(bottom=ax2_ylims[1]*ax_yratio)
+            else:
+                ax.set_ylim(bottom=ax_ylims[1]*ax2_yratio)
+            
+            handles, labels = ax.get_legend_handles_labels()
+            handles2, labels2 = ax2.get_legend_handles_labels()
+            handles += handles2
+            labels += labels2
+            new_handles = [Line2D([], [], c=h.get_edgecolor()) for h in handles]
+            plt.legend(handles=new_handles, labels=labels, prop={'size' : 14})
+            
+            fig.tight_layout()
             plt.show()
 
             continue
