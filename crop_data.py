@@ -51,8 +51,17 @@ def main(ND_INPUT_DIR, ND_OUTPUT_DIR, FD_INPUT_DIR, FD_OUTPUT_DIR, REMOVE_MASK):
         ch_high = ch_cm + 60 if ch_cm + 60 < arr_fd.shape[1] else arr_fd.shape[1] - 1
         ch_low = ch_cm - 60 if ch_cm - 60 >= 0 else 0 
 
-        arr_nd = arr_nd[:, ch_low*8:ch_high*8, 14000:18000]
         arr_fd = arr_fd[:, ch_low:ch_high, 1750:2250]
+        if not REMOVE_MASK:
+            arr_fd = np.concatenate((arr_fd, arr_nd[-1:, ch_low:ch_high, 1750:2250]), 0)
+            arr_nd = arr_nd[:-1]
+        arr_nd = arr_nd[:, ch_low*8:ch_high*8, 14000:18000]
+
+        # from matplotlib import pyplot as plt
+        # fig, ax = plt.subplots(1, 2)
+        # ax[0].imshow(arr_fd[0].T, aspect='auto', interpolation='none')
+        # ax[1].imshow(arr_fd[1].T, aspect='auto', interpolation='none', cmap='Greys')
+        # plt.show()
 
         if arr_nd[0].sum() < 60:
             num_skipped += 1
