@@ -51,7 +51,7 @@ def main(ND_INPUT_DIR, ND_OUTPUT_DIR, FD_INPUT_DIR, FD_OUTPUT_DIR, REMOVE_MASK):
         if ch_cm + 60 >= arr_fd.shape[1]:
             ch_high = arr_fd.shape[1] - 1
             ch_low = ch_high - 120
-        elif ch_cm - 60 < arr_fd.shape[1]:
+        elif ch_cm - 60 < 0:
             ch_low = 0
             ch_high = ch_low + 120
         else:
