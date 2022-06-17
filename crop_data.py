@@ -48,8 +48,15 @@ def main(ND_INPUT_DIR, ND_OUTPUT_DIR, FD_INPUT_DIR, FD_OUTPUT_DIR, REMOVE_MASK):
             arr_avg_weights[ch] = ((np.abs(ch_vec) > 20) * np.abs(ch_vec)).sum()
         ch_cm = int(np.average(np.arange(0, arr_fd.shape[1]), weights=arr_avg_weights))
 
-        ch_high = ch_cm + 60 if ch_cm + 60 < arr_fd.shape[1] else arr_fd.shape[1] - 1
-        ch_low = ch_cm - 60 if ch_cm - 60 >= 0 else 0 
+        if ch_cm + 60 >= arr_fd.shape[1]:
+            ch_high = arr_fd.shape[1] - 1
+            ch_low = ch_high - 120
+        elif ch_cm - 60 < arr_fd.shape[1]:
+            ch_low = 0
+            ch_high = ch_low + 120
+        else:
+            ch_low = ch_cm - 60
+            ch_high = ch_cm + 60
 
         arr_fd = arr_fd[:, ch_low:ch_high, 1750:2250]
         if not REMOVE_MASK:
