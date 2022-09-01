@@ -4,7 +4,7 @@ import ROOT
 import numpy as np
 from tqdm import tqdm
 
-def main(INPUT_FILE, N, OUTPUT_DIR):
+def main(INPUT_FILE, N, OUTPUT_DIR, NO_PADDING):
   f = ROOT.TFile.Open(INPUT_FILE, "READ")
   t = f.Get("exportdigits/digits")
   
@@ -22,20 +22,37 @@ def main(INPUT_FILE, N, OUTPUT_DIR):
 
     id = event.eventid  
 
-    arrZ = np.zeros((1, 512, 4608))
-    arrU = np.zeros((1, 1024, 4608))
-    arrV = np.zeros((1, 1024, 4608))
-    for ch, dig_vec in enumerate(event.digit_vecsZ):
-      for tick, adc in enumerate(dig_vec):
-        arrZ[0, ch + 16, tick + 58] = adc
-      
-    for ch, dig_vec in enumerate(event.digit_vecsU):
-      for tick, adc in enumerate(dig_vec):
-        arrU[0, ch + 112, tick + 58] = adc
+    if NO_PADDING:
+        arrZ = np.zeros((1, 480, 4492))
+        arrU = np.zeros((1, 800, 4492))
+        arrV = np.zeros((1, 800, 4492))
+        for ch, dig_vec in enumerate(event.digit_vecsZ):
+          for tick, adc in enumerate(dig_vec):
+            arrZ[0, ch, tick] = adc
+          
+        for ch, dig_vec in enumerate(event.digit_vecsU):
+          for tick, adc in enumerate(dig_vec):
+            arrU[0, ch, tick] = adc
 
-    for ch, dig_vec in enumerate(event.digit_vecsV):
-      for tick, adc in enumerate(dig_vec):
-        arrV[0, ch + 112, tick + 58] = adc
+        for ch, dig_vec in enumerate(event.digit_vecsV):
+          for tick, adc in enumerate(dig_vec):
+            arrV[0, ch, tick] = adc
+
+    else:
+        arrZ = np.zeros((1, 512, 4608))
+        arrU = np.zeros((1, 1024, 4608))
+        arrV = np.zeros((1, 1024, 4608))
+        for ch, dig_vec in enumerate(event.digit_vecsZ):
+          for tick, adc in enumerate(dig_vec):
+            arrZ[0, ch + 16, tick + 58] = adc
+          
+        for ch, dig_vec in enumerate(event.digit_vecsU):
+          for tick, adc in enumerate(dig_vec):
+            arrU[0, ch + 112, tick + 58] = adc
+
+        for ch, dig_vec in enumerate(event.digit_vecsV):
+          for tick, adc in enumerate(dig_vec):
+            arrV[0, ch + 112, tick + 58] = adc
         
     np.save(os.path.join(out_dir_Z, "FD_detsimZ_{}.npy".format(id)), arrZ)
     np.save(os.path.join(out_dir_U, "FD_detsimU_{}.npy".format(id)), arrU)
@@ -48,10 +65,11 @@ def parse_arguments():
 
   parser.add_argument("-n", type=int, default=0)
   parser.add_argument("-o", type=str, default='', help='output folder name')
+  parser.add_argument("--no_padding", action='store_true')
 
   args = parser.parse_args()
 
-  return (args.input_file, args.n, args.o)
+  return (args.input_file, args.n, args.o, args.no_padding)
 
 if __name__ == '__main__':
   arguments = parse_arguments()
