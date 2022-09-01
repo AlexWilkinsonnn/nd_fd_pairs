@@ -23,9 +23,9 @@ def process_pair(fdnd_pair, out_dir, unaligned):
     raise Exception
 
   if unaligned:
-   shutil.copy(entry_nd_path, os.path.join(out_dir, "{}nd.npy".format(id_nd)))
+    shutil.copy(entry_nd_path, os.path.join(out_dir, "{}nd.npy".format(id_nd)))
   else:
-   arrA = np.load(entry_nd_path)
+    arrA = np.load(entry_nd_path)
 
   # Align ND packets with FD waveforms
   # arrA = np.roll(arrA, -7, 2)

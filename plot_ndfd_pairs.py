@@ -44,6 +44,12 @@ def main(INPUT_DIR, N, NSKIP, NICE_PLOT, OVERLAY, FD_DIR, ND_DEPO_DIR, DOWNRES):
             vmin, vmax = np.min(arr_fd), np.max(arr_fd)
             if ND_DEPO_DIR:
                 arr_depo = arr_depo[16:-16, 58:-58]
+
+        elif arr_nd.shape[0] == 480:
+            cmap = 'viridis'
+            vmin, vmax = np.min(arr_fd), np.max(arr_fd)
+            if ND_DEPO_DIR:
+                arr_depo = arr_depo
             
         elif arr_nd.shape[0] == 1024:
             arr_nd = arr_nd[112:-112, 58:-58]
@@ -53,6 +59,13 @@ def main(INPUT_DIR, N, NSKIP, NICE_PLOT, OVERLAY, FD_DIR, ND_DEPO_DIR, DOWNRES):
             vmin, vmax = -fd_abs_max, fd_abs_max
             if ND_DEPO_DIR:
                 arr_depo = arr_depo[112:-112, 58:-58]
+
+        elif arr_nd.shape[0] == 800:
+            cmap = 'seismic'
+            fd_abs_max = np.max(np.abs(arr_fd))
+            vmin, vmax = -fd_abs_max, fd_abs_max
+            if ND_DEPO_DIR:
+                arr_depo = arr_depo
 
         if OVERLAY:
             # Cropping
